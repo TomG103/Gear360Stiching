@@ -222,5 +222,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    # sys.exit(app.exec_()) # Commented out for headless test
-    print("GUI initialized successfully.")
+    sys.exit(app.exec_())
