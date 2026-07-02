@@ -1,0 +1,4 @@
+## 2025-02-28 - DoS via Memory Exhaustion and Error Leakage
+**Vulnerability:** The application was loading images directly into memory without checking their file size, exposing it to DoS via memory exhaustion. The exception handling in the background worker also leaked internal paths and exact error details to the UI.
+**Learning:** These types of desktop applications using C++ bindings like `cv2` can quickly exhaust memory and crash the process if large or malformed files are provided. Furthermore, leaking exception details in client UI is an information disclosure risk.
+**Prevention:** Added a maximum file size check (100MB) before loading, and caught exceptions safely by internally logging exact errors and emitting safe generic messages to the UI.
