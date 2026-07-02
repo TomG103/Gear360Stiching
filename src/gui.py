@@ -136,7 +136,11 @@ class MainWindow(QMainWindow):
 
         self.camera_combo = QComboBox()
         self.camera_combo.addItems(["Gear 360 (2017)", "Gear 360 (2016)"])
-        top_layout.addWidget(QLabel("Camera Model:"))
+        self.camera_combo.setToolTip("Select the Gear 360 camera model used to capture the images")
+
+        lbl_camera = QLabel("&Camera Model:")
+        lbl_camera.setBuddy(self.camera_combo)
+        top_layout.addWidget(lbl_camera)
         top_layout.addWidget(self.camera_combo)
 
         top_layout.addStretch()
@@ -145,7 +149,11 @@ class MainWindow(QMainWindow):
         self.scale_spin.setRange(10, 100)
         self.scale_spin.setValue(100)
         self.scale_spin.setSuffix("%")
-        top_layout.addWidget(QLabel("Output Scale:"))
+        self.scale_spin.setToolTip("Set the output image resolution scale")
+
+        lbl_scale = QLabel("Output &Scale:")
+        lbl_scale.setBuddy(self.scale_spin)
+        top_layout.addWidget(lbl_scale)
         top_layout.addWidget(self.scale_spin)
 
         layout.addLayout(top_layout)
@@ -154,11 +162,13 @@ class MainWindow(QMainWindow):
         mode_layout = QHBoxLayout()
         self.mode_group = QButtonGroup(self)
 
-        self.radio_simple = QRadioButton("Simple Mode (Use Saved Calibration)")
+        self.radio_simple = QRadioButton("Si&mple Mode (Use Saved Calibration)")
         self.radio_simple.setChecked(True)
+        self.radio_simple.setToolTip("Faster. Uses previously saved calibration data for stitching.")
         self.mode_group.addButton(self.radio_simple, 1)
 
-        self.radio_adv = QRadioButton("Advanced Mode (Dynamic Alignment per Image)")
+        self.radio_adv = QRadioButton("&Advanced Mode (Dynamic Alignment per Image)")
+        self.radio_adv.setToolTip("Slower. Attempts to dynamically calculate the best alignment for every single image.")
         self.mode_group.addButton(self.radio_adv, 2)
 
         mode_layout.addWidget(self.radio_simple)
@@ -166,15 +176,20 @@ class MainWindow(QMainWindow):
         layout.addLayout(mode_layout)
 
         # File list
-        layout.addWidget(QLabel("Drag and Drop Images or Folders here:"))
+        lbl_drag = QLabel("&Drag and Drop Images or Folders here:")
+        layout.addWidget(lbl_drag)
         self.file_list = DropListWidget()
+        self.file_list.setToolTip("List of files to process. Drag and drop files here.")
+        lbl_drag.setBuddy(self.file_list)
         layout.addWidget(self.file_list)
 
         # Buttons
         btn_layout = QHBoxLayout()
-        self.btn_clear = QPushButton("Clear List")
+        self.btn_clear = QPushButton("C&lear List")
+        self.btn_clear.setToolTip("Clear the list of files")
         self.btn_clear.clicked.connect(self.file_list.clear)
-        self.btn_process = QPushButton("Start Processing")
+        self.btn_process = QPushButton("S&tart Processing")
+        self.btn_process.setToolTip("Begin stitching process")
         self.btn_process.clicked.connect(self.start_processing)
 
         btn_layout.addWidget(self.btn_clear)
