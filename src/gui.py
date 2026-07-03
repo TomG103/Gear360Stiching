@@ -2,6 +2,7 @@ import sys
 import os
 import cv2
 import logging
+import html
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QPushButton, QComboBox,
                              QRadioButton, QButtonGroup, QFileDialog, QListWidget,
@@ -228,7 +229,8 @@ class MainWindow(QMainWindow):
         self.worker.start()
 
     def log(self, msg):
-        self.log_text.append(msg)
+        escaped_msg = html.escape(str(msg))
+        self.log_text.append(f"<span>{escaped_msg}</span>")
 
     def on_processing_finished(self):
         self.btn_process.setEnabled(True)
