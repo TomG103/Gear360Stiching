@@ -5,7 +5,7 @@ import logging
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                              QHBoxLayout, QLabel, QPushButton, QComboBox,
                              QRadioButton, QButtonGroup, QFileDialog, QListWidget,
-                             QProgressBar, QTextEdit, QSpinBox, QCheckBox)
+                             QProgressBar, QTextEdit, QSpinBox, QCheckBox, QMessageBox)
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 
 from stitcher import Gear360Stitcher
@@ -203,6 +203,7 @@ class MainWindow(QMainWindow):
 
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
+        self.log_text.setPlaceholderText("Logs will appear here...")
         layout.addWidget(self.log_text)
 
         self.worker = None
@@ -210,7 +211,7 @@ class MainWindow(QMainWindow):
     def start_processing(self):
         files = [self.file_list.item(i).text() for i in range(self.file_list.count())]
         if not files:
-            self.log("No files to process.")
+            QMessageBox.warning(self, "No Files", "No files to process. Please drag and drop images first.")
             return
 
         camera_model = self.camera_combo.currentText()
@@ -218,6 +219,7 @@ class MainWindow(QMainWindow):
         scale = self.scale_spin.value() / 100.0
 
         self.btn_process.setEnabled(False)
+        self.btn_process.setText("Processing...")
         self.progress_bar.setValue(0)
         self.log_text.clear()
 
@@ -232,6 +234,7 @@ class MainWindow(QMainWindow):
 
     def on_processing_finished(self):
         self.btn_process.setEnabled(True)
+        self.btn_process.setText("S&tart Processing")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
