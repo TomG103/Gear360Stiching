@@ -1,0 +1,3 @@
+## 2024-07-03 - Coordinate Mapping Optimization
+**Learning:** Generating explicit grids with `np.meshgrid` prior to mathematical transformations scales extremely poorly in memory and CPU time for very large high-resolution equirectangular projections (e.g., $5472 \times 2736$). Additionally, using `np.stack` simply to apply a $3 \times 3$ rotation matrix creates massive temporary objects.
+**Action:** Always favor NumPy broadcasting for coordinate systems, applying element-wise transforms on 1D representations before implicitly broadcasting them to 2D. Avoid array stacking for simple, low-dimension affine transformations and unroll the dot product manually to preserve contiguous memory access and lower allocation overhead.

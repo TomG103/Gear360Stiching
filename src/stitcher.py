@@ -89,17 +89,22 @@ class Gear360Stitcher:
         W = self.out_width
         H = self.out_height
 
-        # Create a grid of coordinates
-        u, v = np.meshgrid(np.arange(W), np.arange(H))
+        # Create 1D coordinate arrays and use broadcasting
+        u = np.arange(W)
+        v = np.arange(H)
 
         # Longitude and Latitude
         lon = (u / W - 0.5) * 2 * np.pi
         lat = -(v / H - 0.5) * np.pi
 
+        lon2d = lon[np.newaxis, :]
+        lat2d = lat[:, np.newaxis]
+
         # 3D points on sphere
-        X = np.cos(lat) * np.sin(lon)
-        Y = np.sin(lat)
-        Z = np.cos(lat) * np.cos(lon)
+        cos_lat = np.cos(lat2d)
+        X = cos_lat * np.sin(lon2d)
+        Y = np.broadcast_to(np.sin(lat2d), (H, W))
+        Z = cos_lat * np.cos(lon2d)
 
         # Front Lens (facing +Z)
         x1 = X
@@ -148,12 +153,11 @@ class Gear360Stitcher:
         y2_base = Y
         z2_base = -Z
 
-        pts2 = np.stack((x2_base, y2_base, z2_base), axis=-1)
-        pts2_rot = pts2 @ R_total.T
-
-        x2 = pts2_rot[..., 0]
-        y2 = pts2_rot[..., 1]
-        z2 = pts2_rot[..., 2]
+        # Avoid expensive memory allocations and transpositions by doing manual dot product
+        R = R_total.T
+        x2 = x2_base * R[0,0] + y2_base * R[1,0] + z2_base * R[2,0]
+        y2 = x2_base * R[0,1] + y2_base * R[1,1] + z2_base * R[2,1]
+        z2 = x2_base * R[0,2] + y2_base * R[1,2] + z2_base * R[2,2]
 
         theta2 = np.arccos(np.clip(z2, -1.0, 1.0))
         r2 = (self.radius / (self.fov / 2.0 * np.pi / 180.0)) * theta2
