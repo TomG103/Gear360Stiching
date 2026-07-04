@@ -86,6 +86,12 @@ class Gear360Stitcher:
         if height is not None:
             self.out_height = height
 
+        # Optimization: Skip expensive recomputation if parameters haven't changed
+        current_params = (self.out_width, self.out_height, self.yaw2, self.pitch2, self.roll2)
+        if getattr(self, '_last_map_params', None) == current_params and self.map1_x is not None:
+            return
+        self._last_map_params = current_params
+
         W = self.out_width
         H = self.out_height
 
