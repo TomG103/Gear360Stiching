@@ -186,10 +186,8 @@ class MainWindow(QMainWindow):
         # Buttons
         btn_layout = QHBoxLayout()
         self.btn_clear = QPushButton("C&lear List")
-        self.btn_clear.setToolTip("Clear the list of files")
         self.btn_clear.clicked.connect(self.file_list.clear)
         self.btn_process = QPushButton("S&tart Processing")
-        self.btn_process.setToolTip("Begin stitching process")
         self.btn_process.clicked.connect(self.start_processing)
 
         btn_layout.addWidget(self.btn_clear)
@@ -206,6 +204,23 @@ class MainWindow(QMainWindow):
         layout.addWidget(self.log_text)
 
         self.worker = None
+
+        # Update button states based on list content
+        self.file_list.model().rowsInserted.connect(self.update_button_states)
+        self.file_list.model().rowsRemoved.connect(self.update_button_states)
+        self.file_list.model().modelReset.connect(self.update_button_states)
+        self.update_button_states()
+
+    def update_button_states(self):
+        has_files = self.file_list.count() > 0
+        self.btn_clear.setEnabled(has_files)
+        self.btn_process.setEnabled(has_files)
+        if has_files:
+            self.btn_process.setToolTip("Begin stitching process")
+            self.btn_clear.setToolTip("Clear the list of files")
+        else:
+            self.btn_process.setToolTip("Add files to begin stitching")
+            self.btn_clear.setToolTip("No files to clear")
 
     def start_processing(self):
         files = [self.file_list.item(i).text() for i in range(self.file_list.count())]

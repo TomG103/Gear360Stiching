@@ -1,3 +1,7 @@
 ## 2024-05-24 - Accessibility and Discoverability via Shortcuts and Tooltips
 **Learning:** PyQt applications greatly benefit from standard keyboard accessibility practices like mnemonics (using `&` in labels/buttons) and `setBuddy` to link labels with their corresponding input fields, enabling users to jump to inputs using keyboard shortcuts (e.g., `Alt+C`). Adding explicit tooltips on interactive elements provides helpful contextual clues without cluttering the UI. Minor mnemonic overlaps (e.g., `Alt+C` for two different actions) are handled gracefully by Qt via focus cycling, but should generally be minimized where possible.
 **Action:** Always check for missing mnemonics in desktop application labels/buttons and implement `setBuddy` when adding new inputs. Ensure all primary interactive controls have descriptive tooltips to aid usability.
+
+## 2025-02-14 - Dynamic Button States and Tooltips
+**Learning:** In desktop applications, interactive buttons (like 'Start Processing' or 'Clear List') should be disabled when their action is invalid (e.g., when a file list is empty). However, simply disabling a button can confuse users if they don't know *why* it is disabled. Updating the tooltip dynamically when the state changes provides clear, actionable feedback (e.g., changing "Begin stitching process" to "Add files to begin stitching").
+**Action:** Always pair disabled states with explanatory tooltips, and connect them to the data models using signals (like `rowsInserted` or `modelReset`) to ensure the UI stays synchronized with the application state.
