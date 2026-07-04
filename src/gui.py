@@ -31,9 +31,22 @@ class Worker(QThread):
             meta_handler = MetadataHandler()
 
             total = len(self.files)
+            # Security: Maximum allowed file size to prevent memory exhaustion (DoS)
+            MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024 # 100 MB
+
             for i, file_path in enumerate(self.files):
                 if not file_path.lower().endswith(('.jpg', '.jpeg', '.png')):
                     self.log.emit(f"Skipping {os.path.basename(file_path)} (not an image).")
+                    continue
+
+                try:
+                    file_size = os.path.getsize(file_path)
+                    if file_size > MAX_FILE_SIZE_BYTES:
+                        self.log.emit(f"Skipping {os.path.basename(file_path)} (file too large, exceeds 100MB limit).")
+                        continue
+                except OSError as e:
+                    logging.error(f"Failed to check file size for {file_path}: {e}")
+                    self.log.emit(f"Skipping {os.path.basename(file_path)} (error accessing file).")
                     continue
 
                 self.log.emit(f"Processing {os.path.basename(file_path)}...")
@@ -85,7 +98,9 @@ class Worker(QThread):
                 self.progress.emit(int((i+1)/total * 100))
 
         except Exception as e:
-            self.log.emit(f"Error: {str(e)}")
+            # Security: Avoid leaking stack trace or sensitive paths to UI
+            logging.error(f"Unexpected error during processing: {e}", exc_info=True)
+            self.log.emit("An unexpected error occurred during processing.")
 
         self.log.emit("Processing complete.")
         self.finished.emit()
