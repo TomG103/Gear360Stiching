@@ -1,5 +1,6 @@
 import sys
 import os
+import html
 import cv2
 import logging
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
@@ -228,7 +229,9 @@ class MainWindow(QMainWindow):
         self.worker.start()
 
     def log(self, msg):
-        self.log_text.append(msg)
+        # Escape HTML to prevent injection, wrap in span so Qt parses it as rich text properly
+        safe_msg = f"<span>{html.escape(msg)}</span>"
+        self.log_text.append(safe_msg)
 
     def on_processing_finished(self):
         self.btn_process.setEnabled(True)
