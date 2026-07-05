@@ -109,6 +109,14 @@ class DropListWidget(QListWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setAcceptDrops(True)
+        self.setSelectionMode(QListWidget.ExtendedSelection)
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
+            for item in self.selectedItems():
+                self.takeItem(self.row(item))
+        else:
+            super().keyPressEvent(event)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -192,20 +200,24 @@ class MainWindow(QMainWindow):
         layout.addLayout(mode_layout)
 
         # File list
-        lbl_drag = QLabel("&Drag and Drop Images or Folders here:")
+        lbl_drag = QLabel("&Drag and Drop Images/Folders here, or use Add Files:")
         layout.addWidget(lbl_drag)
         self.file_list = DropListWidget()
-        self.file_list.setToolTip("List of files to process. Drag and drop files here.")
+        self.file_list.setToolTip("List of files to process. Drag and drop files, use Add Files button, and press Delete to remove selected.")
         lbl_drag.setBuddy(self.file_list)
         layout.addWidget(self.file_list)
 
         # Buttons
         btn_layout = QHBoxLayout()
+        self.btn_add = QPushButton("&Add Files...")
+        self.btn_add.clicked.connect(self.browse_files)
+        self.btn_add.setToolTip("Browse and add image files to the list")
         self.btn_clear = QPushButton("C&lear List")
         self.btn_clear.clicked.connect(self.file_list.clear)
         self.btn_process = QPushButton("S&tart Processing")
         self.btn_process.clicked.connect(self.start_processing)
 
+        btn_layout.addWidget(self.btn_add)
         btn_layout.addWidget(self.btn_clear)
         btn_layout.addWidget(self.btn_process)
         layout.addLayout(btn_layout)
@@ -226,6 +238,16 @@ class MainWindow(QMainWindow):
         self.file_list.model().rowsRemoved.connect(self.update_button_states)
         self.file_list.model().modelReset.connect(self.update_button_states)
         self.update_button_states()
+
+    def browse_files(self):
+        files, _ = QFileDialog.getOpenFileNames(
+            self,
+            "Select Images",
+            "",
+            "Images (*.png *.jpg *.jpeg)"
+        )
+        if files:
+            self.file_list.addItems(files)
 
     def update_button_states(self):
         has_files = self.file_list.count() > 0
