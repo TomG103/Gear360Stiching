@@ -240,14 +240,24 @@ class Gear360Stitcher:
         self.blend_w1 = np.repeat(self.blend_w1[:, :, np.newaxis], 3, axis=2)
         self.blend_w2 = np.repeat(self.blend_w2[:, :, np.newaxis], 3, axis=2)
 
+        # Optimization: Pre-compute fixed-point maps for faster remap
+        self.map1_16s, self.map1_y_16s = cv2.convertMaps(self.map1_x, self.map1_y, cv2.CV_16SC2)
+        self.map2_16s, self.map2_y_16s = cv2.convertMaps(self.map2_x, self.map2_y, cv2.CV_16SC2)
+
+        # Optimization: Pre-compute uint16 weights for faster blending
+        self.w1_uint16 = (self.blend_w1 * 256).astype(np.uint16)
+        self.w2_uint16 = (self.blend_w2 * 256).astype(np.uint16)
+
     def stitch(self, image):
         if self.map1_x is None:
             self.update_maps()
 
-        img1 = cv2.remap(image, self.map1_x, self.map1_y, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0))
-        img2 = cv2.remap(image, self.map2_x, self.map2_y, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0))
+        # Optimization: Use fixed-point maps which is faster than float32
+        img1 = cv2.remap(image, self.map1_16s, self.map1_y_16s, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0))
+        img2 = cv2.remap(image, self.map2_16s, self.map2_y_16s, cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0, 0, 0))
 
-        blended = img1 * self.blend_w1 + img2 * self.blend_w2
+        # Optimization: Blend using uint16 bitwise math instead of float64 multiplication
+        blended = ((img1.astype(np.uint16) * self.w1_uint16 + img2.astype(np.uint16) * self.w2_uint16) >> 8)
         return blended.astype(np.uint8)
 
     def find_misalignment(self, image):
