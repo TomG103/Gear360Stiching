@@ -5,3 +5,7 @@
 ## 2025-02-14 - Dynamic Button States and Tooltips
 **Learning:** In desktop applications, interactive buttons (like 'Start Processing' or 'Clear List') should be disabled when their action is invalid (e.g., when a file list is empty). However, simply disabling a button can confuse users if they don't know *why* it is disabled. Updating the tooltip dynamically when the state changes provides clear, actionable feedback (e.g., changing "Begin stitching process" to "Add files to begin stitching").
 **Action:** Always pair disabled states with explanatory tooltips, and connect them to the data models using signals (like `rowsInserted` or `modelReset`) to ensure the UI stays synchronized with the application state.
+
+## 2025-02-14 - Keyboard Accessibility for File Input Lists
+**Learning:** Relying solely on drag-and-drop for file ingestion creates a significant accessibility barrier for keyboard-only and screen-reader users. Furthermore, once items are in a list, lacking a keyboard method (like `Delete` or `Backspace`) to remove them forces users to rely on mouse interaction or a global "Clear All" button, which degrades UX.
+**Action:** Always provide an alternative, keyboard-accessible method (like an explicit `Add Files...` button) for drag-and-drop zones. Ensure custom list widgets override `keyPressEvent` to handle standard item deletion keys, and use `ExtendedSelection` to allow batch operations via keyboard.
