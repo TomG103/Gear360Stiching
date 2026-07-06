@@ -5,3 +5,7 @@
 ## 2025-02-14 - Dynamic Button States and Tooltips
 **Learning:** In desktop applications, interactive buttons (like 'Start Processing' or 'Clear List') should be disabled when their action is invalid (e.g., when a file list is empty). However, simply disabling a button can confuse users if they don't know *why* it is disabled. Updating the tooltip dynamically when the state changes provides clear, actionable feedback (e.g., changing "Begin stitching process" to "Add files to begin stitching").
 **Action:** Always pair disabled states with explanatory tooltips, and connect them to the data models using signals (like `rowsInserted` or `modelReset`) to ensure the UI stays synchronized with the application state.
+
+## 2025-02-14 - Keyboard Accessibility and Explicit Controls for Drag-and-Drop
+**Learning:** Custom drag-and-drop widgets (like QListWidget subclasses) often lack standard interaction patterns out of the box, confusing keyboard-only users who expect actions like deletion via the 'Delete' or 'Backspace' keys to work by default. More importantly, drag-and-drop is fundamentally inaccessible to screen readers and many keyboard-only workflows.
+**Action:** Always override `keyPressEvent` on list widgets to support standard item deletion shortcuts. Crucially, whenever drag-and-drop is used for file input, an explicit, alternative button-driven control (like an "Add Files..." button opening a `QFileDialog`) must be provided alongside it to guarantee a fully accessible experience.

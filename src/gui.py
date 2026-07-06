@@ -109,6 +109,14 @@ class DropListWidget(QListWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setAcceptDrops(True)
+        self.setSelectionMode(QListWidget.ExtendedSelection)
+
+    def keyPressEvent(self, event):
+        if event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
+            for item in self.selectedItems():
+                self.takeItem(self.row(item))
+        else:
+            super().keyPressEvent(event)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -192,10 +200,21 @@ class MainWindow(QMainWindow):
         layout.addLayout(mode_layout)
 
         # File list
+        file_list_top_layout = QHBoxLayout()
         lbl_drag = QLabel("&Drag and Drop Images or Folders here:")
-        layout.addWidget(lbl_drag)
+        file_list_top_layout.addWidget(lbl_drag)
+
+        file_list_top_layout.addStretch()
+
+        self.btn_add_files = QPushButton("&Add Files...")
+        self.btn_add_files.setToolTip("Browse and select image files to process")
+        self.btn_add_files.clicked.connect(self.browse_files)
+        file_list_top_layout.addWidget(self.btn_add_files)
+
+        layout.addLayout(file_list_top_layout)
+
         self.file_list = DropListWidget()
-        self.file_list.setToolTip("List of files to process. Drag and drop files here.")
+        self.file_list.setToolTip("List of files to process. Drag and drop files here, or use Add Files button.")
         lbl_drag.setBuddy(self.file_list)
         layout.addWidget(self.file_list)
 
@@ -237,6 +256,16 @@ class MainWindow(QMainWindow):
         else:
             self.btn_process.setToolTip("Add files to begin stitching")
             self.btn_clear.setToolTip("No files to clear")
+
+    def browse_files(self):
+        files, _ = QFileDialog.getOpenFileNames(
+            self,
+            "Select Images",
+            "",
+            "Images (*.png *.jpg *.jpeg)"
+        )
+        for file in files:
+            self.file_list.addItem(file)
 
     def start_processing(self):
         files = [self.file_list.item(i).text() for i in range(self.file_list.count())]
