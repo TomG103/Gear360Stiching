@@ -43,7 +43,7 @@ class Gear360Stitcher:
         self.pitch2 = 0.0
         self.roll2 = 0.0
 
-        self.calibration_file = "calibration.json"
+        self.calibration_file = os.path.expanduser("~/.gear360_calibration.json")
         self.load_calibration()
 
     def load_calibration(self):
@@ -53,10 +53,12 @@ class Gear360Stitcher:
                     calib = json.load(f)
                     if self.camera_model in calib:
                         c = calib[self.camera_model]
-                        self.yaw2 = c.get("yaw2", 0.0)
-                        self.pitch2 = c.get("pitch2", 0.0)
-                        self.roll2 = c.get("roll2", 0.0)
+                        self.yaw2 = float(c.get("yaw2", 0.0))
+                        self.pitch2 = float(c.get("pitch2", 0.0))
+                        self.roll2 = float(c.get("roll2", 0.0))
                         logging.info(f"Loaded calibration for {self.camera_model}")
+            except (ValueError, TypeError) as e:
+                logging.error(f"Error loading calibration data: Invalid format ({e})")
             except Exception as e:
                 logging.error(f"Error loading calibration: {e}")
 
